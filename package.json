@@ -11,9 +11,12 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@mcansh/remix-fastify": "^3.4.0",
     "@remix-run/node": "^2.13.1",
     "@remix-run/react": "^2.13.1",
     "@remix-run/serve": "^2.13.1",
+    "fastify": "^4.28.1",
+    "fastify-static": "^4.7.0",
     "isbot": "^4.1.0",
     "match-sorter": "^6.3.1",
     "react": "^18.2.0",
