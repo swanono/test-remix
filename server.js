@@ -1,40 +1,30 @@
-import Fastify from 'fastify';
-import formbody from '@fastify/formbody';
-import { createRequestHandler } from '@mcansh/remix-fastify';
+import process from 'node:process';
+import chalk from 'chalk';
+import { remixFastify } from '@mcansh/remix-fastify';
+import { fastify } from 'fastify';
+import sourceMapSupport from 'source-map-support';
+import getPort, { portNumbers } from 'get-port';
 
-const viteDevServer =
-  process.env.NODE_ENV === 'production'
-    ? null
-    : await import('vite').then((vite) =>
-        vite.createServer({ server: { middlewareMode: true } })
-      );
+sourceMapSupport.install();
 
-const app = Fastify({
-  logger: true,
+const app = fastify();
+
+await app.register(remixFastify);
+
+const host = process.env.HOST === 'true' ? '0.0.0.0' : '127.0.0.1';
+const desiredPort = Number(process.env.PORT) || 3000;
+const portToUse = await getPort({
+  port: portNumbers(desiredPort, desiredPort + 100),
 });
 
-app.register(formbody);
+let address = await app.listen({ port: portToUse, host });
 
-app.addHook('onRequest', async (request, reply) => {
-  if (viteDevServer) {
-    await new Promise((resolve, reject) => {
-      viteDevServer.middlewares(request.raw, reply.raw, (err) => {
-        if (err) reject(err);
-        resolve();
-      });
-    });
-  }
-});
-
-const build = viteDevServer
-  ? () => viteDevServer.ssrLoadModule('virtual:remix/server-build')
-  : await import('./build/server/index.js');
-
-app.all('*', createRequestHandler({ build }));
-
-try {
-  await app.listen({ port: 3000 });
-} catch (error) {
-  app.log.error(error);
-  process.exit(1);
+if (portToUse !== desiredPort) {
+  console.warn(
+    chalk.yellow(
+      `⚠️  Port ${desiredPort} is not available, using ${portToUse} instead.`
+    )
+  );
 }
+
+console.log(chalk.green(`✅ app ready: ${address}`));
