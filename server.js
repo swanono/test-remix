@@ -1,4 +1,5 @@
 import Fastify from 'fastify';
+import formbody from '@fastify/formbody';
 import { createRequestHandler } from '@mcansh/remix-fastify';
 
 const viteDevServer =
@@ -11,6 +12,8 @@ const viteDevServer =
 const app = Fastify({
   logger: true,
 });
+
+app.register(formbody);
 
 app.addHook('onRequest', async (request, reply) => {
   if (viteDevServer) {
@@ -32,6 +35,6 @@ app.all('*', createRequestHandler({ build }));
 try {
   await app.listen({ port: 3000 });
 } catch (error) {
-  app.log.error(err);
+  app.log.error(error);
   process.exit(1);
 }
