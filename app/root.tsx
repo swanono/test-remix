@@ -11,9 +11,9 @@ import {
   ScrollRestoration,
   useLoaderData,
   useNavigation,
-  useSubmit
+  useSubmit,
 } from '@remix-run/react';
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import { createEmptyContact, getContacts } from './data';
 import appStylesHref from './app.css?url';
 
@@ -26,7 +26,7 @@ export const action = async () => {
   return redirect(`/contacts/${contact.id}/edit`);
 };
 
-export const loader = async ({request}: LoaderFunctionArgs) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
   const q = url.searchParams.get('q');
   const contacts = await getContacts(q);
@@ -39,15 +39,13 @@ export default function App() {
   const submit = useSubmit();
   const searching =
     navigation.location &&
-    new URLSearchParams(navigation.location.search).has(
-      "q"
-    );
+    new URLSearchParams(navigation.location.search).has('q');
 
   const [query, setQuery] = useState(q || '');
 
   useEffect(() => {
     setQuery(q || '');
-  }, [q])
+  }, [q]);
 
   return (
     <html lang='en'>
@@ -65,12 +63,15 @@ export default function App() {
               id='search-form'
               role='search'
               onChange={(event) => {
-                submit(event.currentTarget);
+                const isFirstSearch = q === null;
+                submit(event.currentTarget, {
+                  replace: !isFirstSearch,
+                });
               }}
             >
               <input
                 id='q'
-                className={searching ? "loading" : ""}
+                className={searching ? 'loading' : ''}
                 aria-label='Search contacts'
                 placeholder='Search'
                 type='search'
@@ -92,12 +93,8 @@ export default function App() {
                 {contacts.map((contact) => (
                   <li key={contact.id}>
                     <NavLink
-                      className={({isActive, isPending}) =>
-                        isActive
-                          ? 'active'
-                          : isPending
-                          ? 'pending'
-                          : ''
+                      className={({ isActive, isPending }) =>
+                        isActive ? 'active' : isPending ? 'pending' : ''
                       }
                       to={`contacts/${contact.id}`}
                     >
@@ -124,8 +121,7 @@ export default function App() {
         </div>
         <div
           className={
-            navigation.state === 'loading' && !searching
-            ? 'loading' : ''
+            navigation.state === 'loading' && !searching ? 'loading' : ''
           }
           id='detail'
         >
